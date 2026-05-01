@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Macro Elliott Analysis (1D)</title>
+    <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+        #chart { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="chart"></div>
+    <script>
+        // LocalStorage එකෙන් Data ගන්න
+        const dataStr = localStorage.getItem('macro_chart_data');
+        if(dataStr) {
+            const data = JSON.parse(dataStr);
+            document.title = `MACRO ANALYSIS: ${data.symbol}`;
+            
+            const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+                layout: { background: { color: '#000' }, textColor: '#ccc' },
+                grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } },
+            });
+            const series = chart.addCandlestickSeries();
+            series.setData(data.ohlc);
+
+            // Markers (Wave Labels) අඳිනවා
+            const markers = data.waves.map(w => ({
+                time: new Date(w.date).getTime() / 1000,
+                position: w.type === 'high' ? 'aboveBar' : 'belowBar',
+                color: w.type === 'high' ? '#ff1744' : '#00e676',
+                shape: w.type === 'high' ? 'arrowDown' : 'arrowUp',
+                text: w.label,
+                size: 2
+            })).sort((a,b) => a.time - b.time);
+            
+            series.setMarkers(markers);
+            chart.timeScale().fitContent();
+        } else {
+            document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px;'>No Data Found. Run Analysis first.</h2>";
+        }
+    </script>
+</body>
+</html>

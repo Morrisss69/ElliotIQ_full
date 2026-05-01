@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElliotIQ | AI Crypto Trading Dashboard</title>
+    
+    <!-- Chart Library -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <div id="app-layout">
+        <!-- HEADER -->
+        <header id="header">
+            <div class="logo-area">
+                <div class="logo-icon-wrapper">
+                    <img src="images/icon.png" alt="ElliotIQ" class="logo-icon" onerror="this.style.display='none'">
+                    <div class="logo-glow"></div>
+                </div>
+                <span class="logo-text">Elliot<span class="highlight">IQ</span></span>
+            </div>
+
+            <div id="dashboard-controls" class="top-controls">
+                <div class="control-group">
+                    <label class="control-label">Market</label>
+                    <select id="market-selector" class="market-select">
+                        <option value="crypto">CRYPTO</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Symbol</label>
+                    <div class="input-with-icon">
+                        <input type="text" id="coin-input" value="BTCUSDT" placeholder="SYMBOL">
+                    </div>
+                </div>
+
+                <div class="price-badge">
+                    <span class="price-label">LIVE PRICE</span>
+                    <div id="live-price" class="live-price-display">-</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Timeframe</label>
+                    <select id="timeframe-select">
+                        <option value="15m">15m</option>
+                        <option value="1h">1h</option>
+                        <option value="4h">4h</option>
+                        <option value="1d">1D</option>
+                    </select>
+                </div>
+
+                <button id="analyze-btn" class="btn-primary">
+                    <span class="btn-text">RUN ANALYSIS</span>
+                    <div class="btn-glow"></div>
+                </button>
+            </div>
+
+            <div class="user-profile-placeholder">
+                <!-- Future space for account/subscription -->
+                <div class="profile-avatar"></div>
+            </div>
+        </header>
+
+        <!-- SIDEBAR NAVIGATION -->
+        <nav id="sidebar">
+            <div class="nav-items">
+                <div class="nav-icon active" onclick="switchTab('dashboard', this)" title="Dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                    <span class="nav-label">Dashboard</span>
+                </div>
+                <div class="nav-icon" onclick="switchTab('scanner', this)" title="Scanner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <path d="M7 10h6" />
+                    </svg>
+                    <span class="nav-label">Scanner</span>
+                </div>
+                <div class="nav-icon" onclick="switchTab('settings', this)" title="Settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+                    </svg>
+                    <span class="nav-label">Settings</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT AREA -->
+        <main id="main-view">
+            <!-- DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view-section active">
+                <div class="dashboard-grid">
+                    <!-- CHART SECTION -->
+                    <div id="chart-container" class="chart-wrapper chart-init-hidden">
+                        <div class="chart-header">
+                            <div class="chart-title-group">
+                                <h2 class="section-title">Market Chart</h2>
+                                <div class="chart-watermark">ElliotIQ</div>
+                            </div>
+                            <div class="chart-toolbar">
+                                <button class="tf-btn active" data-tf="15m">15m</button>
+                                <button class="tf-btn" data-tf="1h">1H</button>
+                                <button class="tf-btn" data-tf="4h">4H</button>
+                                <button class="tf-btn" data-tf="1d">1D</button>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-main">
+                            <div id="chart-inner"></div>
+                            
+                            <div id="trend-meter">
+                                <div class="trend-item">
+                                    <span class="trend-label">MACRO TREND</span>
+                                    <div id="meter-macro" class="trend-val">-</div>
+                                </div>
+                                <div class="trend-divider"></div>
+                                <div class="trend-item">
+                                    <span class="trend-label">WAVE PHASE</span>
+                                    <div id="meter-micro" class="trend-val">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ANALYSIS TERMINAL -->
+                    <div id="ai-logs" class="terminal-wrapper">
+                        <div class="terminal-header">
+                            <div class="terminal-title">
+                                <div class="status-dot pulse"></div>
+                                <span>Analysis Terminal</span>
+                            </div>
+                        </div>
+                        <div id="ai-logs-content" class="terminal-content">
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <p>Waiting for analysis input...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCANNER VIEW -->
+            <section id="view-scanner" class="view-section">
+                <div class="scanner-container">
+                    <div class="view-header">
+                        <div class="header-info">
+                            <h2 class="view-title">Market Scanner</h2>
+                            <p class="view-subtitle">AI-powered opportunity identification</p>
+                        </div>
+                        <div class="scanner-controls">
+                            <div class="control-group">
+                                <label class="control-label">Scan Mode</label>
+                                <select id="scan-mode">
+                                    <option value="scalp">Scalp (15m)</option>
+                                    <option value="swing">Swing (4h)</option>
+                                </select>
+                            </div>
+                            <button id="start-scan-btn" class="btn-primary">
+                                <span>START SCAN</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="scanner-grid" class="scanner-results">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <p>Select a mode to identify market opportunities.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETTINGS VIEW -->
+            <section id="view-settings" class="view-section">
+                <div class="settings-container">
+                    <div class="view-header">
+                        <div class="header-info">
+                            <h2 class="view-title">Settings</h2>
+                            <p class="view-subtitle">Configure your trading preferences</p>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3 class="card-title">Default Preferences</h3>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label class="settings-label">Default Coin</label>
+                                    <input type="text" id="set-def-coin" placeholder="BTCUSDT">
+                                </div>
+                                <div class="form-group">
+                                    <label class="settings-label">Default Timeframe</label>
+                                    <select id="set-def-tf">
+                                        <option value="15m">15 Minutes</option>
+                                        <option value="1h">1 Hour</option>
+                                        <option value="4h">4 Hours</option>
+                                        <option value="1d">1 Day</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="settings-label">Scanner Mode</label>
+                                    <select id="set-def-scan">
+                                        <option value="scalp">Scalp</option>
+                                        <option value="swing">Swing</option>
+                                    </select>
+                                </div>
+                                <div class="form-actions">
+                                    <button id="save-settings-btn" class="btn-primary">SAVE SETTINGS</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- RIGHT INFO PANEL -->
+        <aside id="right-sidebar">
+            <div class="panel-header">
+                <h3 class="panel-title">Market Intel</h3>
+            </div>
+            <div id="ai-stats-panel" class="panel-content">
+                <div class="empty-state mini">
+                    <p>No Active Analysis</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>
